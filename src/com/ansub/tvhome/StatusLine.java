@@ -6,8 +6,10 @@ import android.content.SharedPreferences;
 import android.os.SystemClock;
 import android.widget.TextView;
 
+import java.util.Objects;
+
 // Keeps the line under the clock up to date while the home screen is in front: memory and VPN
-// every minute, weather in the background every 30 minutes (only if a city was set).
+// every minute, weather in the background every 30 minutes (for the set city, else where the TV is).
 final class StatusLine {
     private static final String CITY = "city", TAILSCALE = "com.tailscale.ipn";
     private static final long TICK_MS = 60 * 1000, WEATHER_MS = 30 * 60 * 1000, RETRY_MS = 5 * 60 * 1000;
@@ -47,14 +49,16 @@ final class StatusLine {
         view.setVisibility(visible ? android.view.View.VISIBLE : android.view.View.INVISIBLE);
     }
 
-    // Saves the city passed with --es city "...". An empty city turns weather off.
+    // Saves the city passed with --es city "...": a name, "" to turn weather off, or "auto" to go
+    // back to finding the TV's area by itself (the default).
     void saveCity(Intent intent) {
         String city = intent == null ? null : intent.getStringExtra(CITY);
         if (city == null) return;
         city = city.trim();
         if (city.length() > MAX_CITY) return; // any app can send this; a real city name is short
-        if (city.equals(prefs.getString(CITY, ""))) return; // same city replayed: keep the weather
-        if (city.isEmpty()) prefs.edit().remove(CITY).apply();
+        if (city.equalsIgnoreCase("auto")) city = null;
+        if (Objects.equals(city, prefs.getString(CITY, null))) return; // same city replayed: keep the weather
+        if (city == null) prefs.edit().remove(CITY).apply();
         else prefs.edit().putString(CITY, city).apply();
         weather = null;
         weatherAt = 0;
@@ -64,14 +68,14 @@ final class StatusLine {
         show();
         final String city = prefs.getString(CITY, null);
         long now = SystemClock.elapsedRealtime();
-        if (city == null || (weatherAt != 0 && now - weatherAt < WEATHER_MS)) return;
+        if ("".equals(city) || (weatherAt != 0 && now - weatherAt < WEATHER_MS)) return; // "" = weather off
         weatherAt = now;
         new Thread(() -> {
             String got = null;
-            try { got = Weather.now(city); } catch (Exception ignored) {}
+            try { got = Weather.now(city); } catch (Exception e) { android.util.Log.w("tvhome", "weather failed", e); }
             final String w = got;
             activity.runOnUiThread(() -> {
-                if (!city.equals(prefs.getString(CITY, null))) return; // city changed while fetching
+                if (!Objects.equals(city, prefs.getString(CITY, null))) return; // city changed while fetching
                 if (w != null) {
                     weather = w;
                     weatherOkAt = SystemClock.elapsedRealtime();

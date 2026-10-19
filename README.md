@@ -206,13 +206,17 @@ Remote shortcuts: number keys **1** to **9** open the app in that spot, **red** 
 <summary><b>What is the line under the clock?</b></summary>
 <br>
 
-It shows how much memory is free and, if Tailscale is installed, "Tailscale on" or "Tailscale off". To add the weather, run the installer again with your city at the end (the empty `""` keeps your apps as they are):
+It shows the weather where the TV is, how much memory is free and, if Tailscale is installed, "Tailscale on" or "Tailscale off".
+
+Weather comes from [Open-Meteo](https://open-meteo.com) and the TV's area from [GeoJS](https://www.geojs.io), both free with no account. To find the area, the app asks GeoJS where its internet address is, so it is as close as your internet provider's location, usually your city or a nearby one. It then sends that map position to Open-Meteo. Nothing else about you or your TV is sent. This is the only reason the app asks for internet access.
+
+If the area is wrong, set your city instead (the empty `""` keeps your apps as they are). Then the app sends Open-Meteo the city name and that city's map position, and never asks GeoJS:
 
 ```sh
-sh install.sh <TV_IP> "" "Mumbai"
+sh install.sh <TV_IP> "" "Mumbai"   # use this city
+sh install.sh <TV_IP> "" "auto"     # back to the TV's own area
+sh install.sh <TV_IP> "" ""         # turn the weather off; the app then never goes online
 ```
-
-Weather comes from [Open-Meteo](https://open-meteo.com): free, no account. The app sends the city name to look it up, then that city's map position to get the forecast. Nothing about you or your TV is sent. This is the only reason the app asks for internet access; without a city it never goes online. To turn the weather off again, run the same command with an empty city: `sh install.sh <TV_IP> "" ""`.
 
 </details>
 

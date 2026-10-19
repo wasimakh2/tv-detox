@@ -3,7 +3,8 @@
 #
 #   sh install.sh <TV_IP>                          your TV apps, picked for you
 #   sh install.sh <TV_IP> "com.netflix.ninja,com.google.android.youtube.tv"
-#   sh install.sh <TV_IP> "" "Mumbai"            also show the weather for a city ("" keeps your apps)
+#   sh install.sh <TV_IP> "" "Mumbai"            weather for a set city instead of the TV's own area
+#                                                 ("" keeps your apps; city "" turns weather off, "auto" back on)
 #
 # Uses out/tvhome.apk if you built it, otherwise downloads the latest release.
 set -e
@@ -54,7 +55,7 @@ if [ -n "$APPS" ]; then
   # The stamp makes the app apply this list once, even if Android later replays this start.
   adb -s "$TV" shell am start -n com.ansub.tvhome/.MainActivity --es apps "\"$APPS\"" --es stamp "$(date +%s)" >/dev/null
 fi
-if [ $# -ge 3 ]; then # an empty city turns the weather off
+if [ $# -ge 3 ]; then # "" turns the weather off, "auto" goes back to the TV's own area
   adb -s "$TV" shell am start -n com.ansub.tvhome/.MainActivity --es city "\"$CITY\"" >/dev/null
 fi
 
