@@ -30,6 +30,7 @@ echo "== home screen shows a clock and Settings"
 x=$(ui)
 echo "$x" | grep -q 'text="Settings"' || fail "no Settings tile"
 echo "$x" | grep -qE 'text="[0-9]{1,2}:[0-9]{2}"' || fail "no clock"
+echo "$x" | grep -qE '[0-9]+ MB memory free' || fail "no status line under the clock"
 tiles=$(echo "$x" | grep -o 'focusable="true"' | wc -l | tr -d ' ')
 echo "   $tiles tiles"
 
@@ -50,9 +51,20 @@ if [ -n "$app" ]; then
   n=$(ui | grep -o 'focusable="true"' | wc -l | tr -d ' ')
   [ "$n" -ge 2 ] || fail "custom app $app didn't show up"
   echo "   $app shows up"
+  adb -s "$TV" shell input keyevent KEYCODE_1; sleep 3
+  focus | grep -q "$app" || fail "key 1 didn't open $app"
+  adb -s "$TV" shell input keyevent KEYCODE_HOME
+  wait_home || fail "Home didn't come back after key 1"
+  echo "   key 1 opens $app"
 else
   echo "   skipped: this device has no TV apps"
 fi
+
+echo "== red key opens Settings"
+adb -s "$TV" shell input keyevent KEYCODE_PROG_RED; sleep 3
+focus | grep -qi settings || fail "red key didn't open Settings"
+adb -s "$TV" shell input keyevent KEYCODE_HOME
+wait_home || fail "Home didn't come back after red key"
 
 adb -s "$TV" exec-out screencap -p > "$SHOT"
 

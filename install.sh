@@ -3,13 +3,17 @@
 #
 #   sh install.sh <TV_IP>                          your TV apps, picked for you
 #   sh install.sh <TV_IP> "com.netflix.ninja,com.google.android.youtube.tv"
+#   sh install.sh <TV_IP> "" "Mumbai"            weather for a set city instead of the TV's own area
+#                                                 ("" keeps your apps; city "" turns weather off, "auto" back on)
 #
 # Uses out/tvhome.apk if you built it, otherwise downloads the latest release.
 set -e
 cd "$(dirname "$0")"
 
-TARGET="$1"; APPS="$2"
-[ -n "$TARGET" ] || { echo "Usage: sh install.sh <TV_IP> [\"app1,app2,...\"]" >&2; exit 1; }
+TARGET="$1"; APPS="$2"; CITY="$3"
+[ -n "$TARGET" ] || { echo "Usage: sh install.sh <TV_IP> [\"app1,app2,...\"] [\"City\"]" >&2; exit 1; }
+# Both go through the TV's shell inside double quotes, so quotes, $, ` and \ would break out.
+case "$APPS$CITY" in *[\"\$\`\\]*) echo "The app list or city has a quote mark, dollar sign, backtick or backslash, which the TV can't take. Remove it and run again." >&2; exit 1 ;; esac
 command -v adb >/dev/null 2>&1 || {
   echo "adb is missing. Install it first:" >&2
   echo "  Mac:     brew install android-platform-tools" >&2
@@ -50,6 +54,9 @@ fi
 if [ -n "$APPS" ]; then
   # The stamp makes the app apply this list once, even if Android later replays this start.
   adb -s "$TV" shell am start -n com.ansub.tvhome/.MainActivity --es apps "\"$APPS\"" --es stamp "$(date +%s)" >/dev/null
+fi
+if [ $# -ge 3 ]; then # "" turns the weather off, "auto" goes back to the TV's own area
+  adb -s "$TV" shell am start -n com.ansub.tvhome/.MainActivity --es city "\"$CITY\"" >/dev/null
 fi
 
 ME=com.ansub.tvhome/.MainActivity

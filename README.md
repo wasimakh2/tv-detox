@@ -198,6 +198,26 @@ Use the remote. Hold **OK** on an app (or press **Menu**) to:
 
 To add an app, pick the **Add app** tile in the bottom row. Add as many apps as you like: they wrap into rows of six, and the page scrolls once there are more than twelve. Your changes are kept until you run `install.sh` with a new app list.
 
+Remote shortcuts: number keys **1** to **9** open the app in that spot, **red** opens Settings and **blue** opens Add app.
+
+</details>
+
+<details>
+<summary><b>What is the line under the clock?</b></summary>
+<br>
+
+It shows the weather where the TV is, how much memory is free and, if Tailscale is installed, "Tailscale on" or "Tailscale off".
+
+Weather comes from [Open-Meteo](https://open-meteo.com) and the TV's area from [GeoJS](https://www.geojs.io), both free with no account. To find the area, the app asks GeoJS where its internet address is, so it is as close as your internet provider's location, usually your city or a nearby one. It then sends that map position to Open-Meteo. Nothing else about you or your TV is sent. This is the only reason the app asks for internet access.
+
+If the area is wrong, set your city instead (the empty `""` keeps your apps as they are). Then the app sends Open-Meteo the city name and that city's map position, and never asks GeoJS:
+
+```sh
+sh install.sh <TV_IP> "" "Mumbai"   # use this city
+sh install.sh <TV_IP> "" "auto"     # back to the TV's own area
+sh install.sh <TV_IP> "" ""         # turn the weather off; the app then never goes online
+```
+
 </details>
 
 <details>
