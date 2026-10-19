@@ -198,6 +198,22 @@ Use the remote. Hold **OK** on an app (or press **Menu**) to:
 
 To add an app, pick the **Add app** tile in the bottom row. Add as many apps as you like: they wrap into rows of six, and the page scrolls once there are more than twelve. Your changes are kept until you run `install.sh` with a new app list.
 
+Remote shortcuts: number keys **1** to **9** open the app in that spot, **red** opens Settings and **blue** opens Add app.
+
+</details>
+
+<details>
+<summary><b>What is the line under the clock?</b></summary>
+<br>
+
+It shows how much memory is free and, if Tailscale is installed, "Tailscale on" or "Tailscale off". To add the weather, run the installer again with your city at the end (the empty `""` keeps your apps as they are):
+
+```sh
+sh install.sh <TV_IP> "" "Mumbai"
+```
+
+Weather comes from [Open-Meteo](https://open-meteo.com): free, no account. The app sends the city name to look it up, then that city's map position to get the forecast. Nothing about you or your TV is sent. This is the only reason the app asks for internet access; without a city it never goes online. To turn the weather off again, run the same command with an empty city: `sh install.sh <TV_IP> "" ""`.
+
 </details>
 
 <details>
